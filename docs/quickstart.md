@@ -25,6 +25,11 @@ remote-host config set-token <your-token>
 
 # Show current configuration
 remote-host config show
+
+# Execute a command on a remote device via SSH
+remote-host exec -d <device> <command> [args...]
+# Example:
+remote-host exec -d my-server kubectl get pods
 ```
 
 ## Next Steps

@@ -4,6 +4,7 @@ import { registerConfig } from "./commands/config.js";
 import { registerCompletion } from "./commands/completion.js";
 import { registerDevice } from "./commands/device.js";
 import { registerSsh } from "./commands/ssh.js";
+import { registerExec } from "./commands/exec.js";
 import { registerUpload } from "./commands/upload.js";
 import { registerDownload } from "./commands/download.js";
 
@@ -23,6 +24,7 @@ registerConfig(program);
 registerCompletion(program);
 registerDevice(program);
 registerSsh(program);
+registerExec(program);
 registerUpload(program);
 registerDownload(program);
 

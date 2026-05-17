@@ -10,7 +10,7 @@ _remote_host_completion() {
 
   # Top-level completion
   if [[ $COMP_CWORD -eq 1 ]]; then
-    COMPREPLY=($(compgen -W "device ssh upload download config completion" -- "\${cur}"))
+    COMPREPLY=($(compgen -W "device ssh exec upload download config completion" -- "\${cur}"))
     return
   fi
 
@@ -44,6 +44,21 @@ _remote_host_completion() {
           local opts=$(_filter_used_options "--name --host --port --username --password --key-file --clear-password --clear-key-file" "\${COMP_WORDS[@]:3}")
           COMPREPLY=($(compgen -W "\${opts}" -- "\${cur}")) ;;
       esac ;;
+    ssh)
+      if [[ $COMP_CWORD -eq 2 ]]; then
+        local devices
+        devices=$(grep '^\s*name:' ~/.remote-ssh/devices.yaml 2>/dev/null | sed 's/^\s*name:\s*//')
+        COMPREPLY=($(compgen -W "$devices" -- "\${cur}"))
+      fi ;;
+    exec)
+      if [[ "\${prev}" == "-d" || "\${prev}" == "--device" ]]; then
+        local devices
+        devices=$(grep '^\s*name:' ~/.remote-ssh/devices.yaml 2>/dev/null | sed 's/^\s*name:\s*//')
+        COMPREPLY=($(compgen -W "$devices" -- "\${cur}"))
+      elif [[ $COMP_CWORD -eq 2 ]]; then
+        local opts=$(_filter_used_options "-d --device" "\${COMP_WORDS[@]:2}")
+        COMPREPLY=($(compgen -W "\${opts}" -- "\${cur}"))
+      fi ;;
     upload)
       local opts=$(_filter_used_options "--recursive" "\${COMP_WORDS[@]:2}")
       COMPREPLY=($(compgen -W "\${opts}" -- "\${cur}")) ;;
