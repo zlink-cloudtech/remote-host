@@ -9,7 +9,7 @@ VERSION_FILE="$REPO_ROOT/VERSION"
 [[ -f "$VERSION_FILE" ]] || { echo "ERROR: $VERSION_FILE not found" >&2; exit 1; }
 
 version=$(tr -d '[:space:]' < "$VERSION_FILE")
-[[ "$version" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]] || {
+[[ "$version" =~ ^[0-9]+\.[0-9]+\.[0-9]+(-preview\.[0-9]+)?$ ]] || {
   echo "ERROR: VERSION '$version' is not valid semver" >&2; exit 1
 }
 
@@ -39,7 +39,7 @@ fi
 # Sync CLI source program.version() if present
 CLI_INDEX="$REPO_ROOT/cli/src/index.ts"
 if [[ -f "$CLI_INDEX" ]]; then
-  sed -i "s/\.version(\"[0-9]\+\.[0-9]\+\.[0-9]\+\")/.version(\"$version\")/" "$CLI_INDEX"
+  sed -Ei "s/\.version\(\"[0-9]+\.[0-9]+\.[0-9]+(-preview\.[0-9]+)?\"\)/.version(\"$version\")/" "$CLI_INDEX"
 fi
 
 echo "Synced all manifests → $version" >&2

@@ -30,7 +30,8 @@ done
 [[ -f "$VERSION_FILE" ]] || { echo "ERROR: $VERSION_FILE not found" >&2; exit 1; }
 
 current=$(tr -d '[:space:]' < "$VERSION_FILE")
-IFS='.' read -r major minor patch <<< "$current"
+base_version=$(sed -E 's/-preview\.[0-9]+$//' <<< "$current")
+IFS='.' read -r major minor patch <<< "$base_version"
 
 if [[ -n "$EXPLICIT_VERSION" ]]; then
   new_version="$EXPLICIT_VERSION"

@@ -4,7 +4,7 @@ set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 VERSION_FILE="$REPO_ROOT/VERSION"
-SEMVER_RE='^[0-9]+\.[0-9]+\.[0-9]+$'
+SEMVER_RE='^[0-9]+\.[0-9]+\.[0-9]+(-preview\.[0-9]+)?$'
 
 [[ -f "$VERSION_FILE" ]] || { echo "✗ VERSION file not found" >&2; exit 1; }
 

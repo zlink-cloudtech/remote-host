@@ -17,6 +17,7 @@
     "lint:all": "pnpm lint && pnpm lint:eslint && pnpm lint:prettier && pnpm lint:md",
     "lint:fix": "eslint . --fix && prettier --write .",
     "check-versions": "bash scripts/check-versions.sh",
+    "version:preview": "bash scripts/version-preview.sh",
     "setup-hooks": "bash scripts/setup-hooks.sh"
   },
   "devDependencies": {
