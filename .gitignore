@@ -3,3 +3,4 @@ dist/
 *.tgz
 .env
 storage/
+wang_hongqi.pem

@@ -3,6 +3,7 @@
 # ── Bash profile ──────────────────────────────────────────────────────────────
 cat > ~/.bashrc << 'RCEOF'
 source /usr/share/bash-completion/bash_completion 2>/dev/null || true
+source <(remote-host completion bash 2>/dev/null) || true
 export PS1='\[\e[32m\][sandbox]\[\e[0m\] \w \$ '
 RCEOF
 
