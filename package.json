@@ -1,0 +1,37 @@
+{
+  "name": "remote-host",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "pnpm --filter='./cli' build",
+    "test": "pnpm --filter='./cli' build && pnpm --filter='./tests' test",
+    "sandbox": "bash sandbox/sandbox.sh",
+    "sandbox:nb": "bash sandbox/sandbox.sh --no-build",
+    "sandbox:cn": "bash sandbox/sandbox.sh --cn",
+    "sandbox:cn:nb": "bash sandbox/sandbox.sh --cn --no-build",
+    "lint": "pnpm -r lint",
+    "clean": "pnpm -r clean",
+    "lint:eslint": "eslint .",
+    "lint:prettier": "prettier --check .",
+    "lint:md": "markdownlint-cli2 '**/*.md' '#**/node_modules/**' '#**/dist/**'",
+    "lint:all": "pnpm lint && pnpm lint:eslint && pnpm lint:prettier && pnpm lint:md",
+    "lint:fix": "eslint . --fix && prettier --write .",
+    "check-versions": "bash scripts/check-versions.sh",
+    "setup-hooks": "bash scripts/setup-hooks.sh"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.0.0",
+    "@types/node": "^20.0.0",
+    "eslint": "^9.0.0",
+    "eslint-config-prettier": "^9.1.0",
+    "markdownlint-cli2": "^0.22.0",
+    "prettier": "^3.3.0",
+    "tsx": "^4.0.0",
+    "typescript": "^5.4.0",
+    "typescript-eslint": "^8.0.0"
+  },
+  "engines": {
+    "node": ">=20.0.0",
+    "pnpm": ">=9.0.0"
+  }
+}

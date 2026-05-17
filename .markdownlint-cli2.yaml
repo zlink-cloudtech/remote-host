@@ -1,0 +1,11 @@
+# markdownlint-cli2 configuration
+config:
+  # Allow longer lines in code-heavy documentation (matches Prettier printWidth: 100)
+  MD013:
+    line_length: 120
+    tables: false
+    code_blocks: false
+  # Allow code blocks without language in generated docs
+  MD040: false
+  # Allow blank lines in block quotes (used in AGENTS.md sync rules)
+  MD028: false
