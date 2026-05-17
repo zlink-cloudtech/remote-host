@@ -18,7 +18,7 @@ const program = new Command();
 program
   .name("remote-host")
   .description("SSH/SCP tool for managing remote devices")
-  .version("0.1.3");
+  .version("0.1.4");
 
 registerConfig(program);
 registerCompletion(program);
