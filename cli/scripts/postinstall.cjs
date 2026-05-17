@@ -42,13 +42,20 @@ function applyBashCompletion(homedir, platform) {
   try {
     try {
       const existing = fs.readFileSync(bashrc, "utf8");
-      if (existing.includes(marker)) return; // already registered — idempotent
+      if (existing.includes(marker)) {
+        // Already registered — completion loads dynamically on each new shell.
+        // Remind the user to reload in the current session.
+        console.log(`[${TOOL}] bash completion already registered.`);
+        console.log(`[${TOOL}] To reload in current session: eval "$(${TOOL} completion bash)"`);
+        return;
+      }
     } catch {
       // file doesn't exist yet — continue to create it
     }
 
     fs.appendFileSync(bashrc, loaderLine);
     console.log(`[${TOOL}] bash completion registered: ${bashrc}`);
+    console.log(`[${TOOL}] To activate in current session: eval "$(${TOOL} completion bash)"`);
   } catch (err) {
     console.warn(`[${TOOL}] postinstall: could not register bash completion:`, err.message);
   }
