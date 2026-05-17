@@ -1,0 +1,89 @@
+name: Publish
+
+# Trigger chain: CI → Release → Publish.
+# Also supports manual tag push (push: tags) and workflow_dispatch as fallback.
+
+on:
+  workflow_run:
+    workflows: ["Release"]
+    types: [completed]
+    branches: [main]
+  push:
+    tags:
+      - "v*.*.*"
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Tag to publish (e.g. v1.2.3)"
+        required: true
+        type: string
+
+jobs:
+  npm:
+    name: Build & Publish NPM Package
+    runs-on: ubuntu-latest
+    # Skip if triggered by a failed Release run
+    if: >
+      github.event_name != 'workflow_run' ||
+      github.event.workflow_run.conclusion == 'success'
+    permissions:
+      contents: write
+      packages: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - name: Extract version from tag
+        id: version
+        run: |
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            PUBLISH_TAG="${{ inputs.tag }}"
+          elif [[ "${{ github.event_name }}" == "push" ]]; then
+            PUBLISH_TAG="${{ github.ref_name }}"
+          else
+            PUBLISH_TAG="v$(cat VERSION)"
+          fi
+          echo "PUBLISH_TAG=$PUBLISH_TAG" >> "$GITHUB_ENV"
+          echo "PUBLISH_VERSION=${PUBLISH_TAG#v}" >> "$GITHUB_ENV"
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: "9"
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: pnpm
+          registry-url: "https://npm.pkg.github.com"
+          scope: "@zlink-cloudtech"
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Check version consistency
+        run: bash scripts/check-versions.sh
+
+      - name: Build CLI
+        run: pnpm build
+
+      - name: Publish to GitHub Package Registry
+        working-directory: cli
+        run: npm publish
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Create GitHub Release
+        run: |
+          gh release create "${{ env.PUBLISH_TAG }}" \
+            --title "v${{ env.PUBLISH_VERSION }}" \
+            --notes "## Installation
+
+          \`\`\`bash
+          npm install -g @zlink-cloudtech/remote-host@${{ env.PUBLISH_VERSION }}
+          \`\`\`"
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

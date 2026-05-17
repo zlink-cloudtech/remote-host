@@ -1,0 +1,69 @@
+name: Release
+
+# Triggered automatically after CI passes on a push to main.
+# Bumps the VERSION file, syncs all manifests, commits [skip ci], creates
+# and pushes a semver tag — which in turn triggers the Publish workflow.
+#
+# secrets.GH_PAT (PAT with `repo` scope) is required for the pushed tag to
+# automatically re-trigger other workflows. Without it, GITHUB_TOKEN is used
+# and the tag is created but Publish must be triggered manually.
+
+on:
+  workflow_run:
+    workflows: ["CI"]
+    types: [completed]
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Explicit version to release (e.g. 1.0.0 or v1.0.0). Overrides bump_type."
+        required: false
+        type: string
+      bump_type:
+        description: "Version bump type (used only when version is not set)"
+        required: false
+        default: "patch"
+        type: choice
+        options: [patch, minor, major]
+
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+jobs:
+  release:
+    name: Bump VERSION & Create Release Tag
+    runs-on: ubuntu-latest
+    # Only release when CI passed on a real push (not a PR or bot commit),
+    # or when triggered manually via workflow_dispatch.
+    if: >
+      github.event_name == 'workflow_dispatch' ||
+      github.event.workflow_run.conclusion == 'success' &&
+      github.event.workflow_run.event == 'push' &&
+      github.event.workflow_run.triggering_actor.login != 'github-actions[bot]'
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GH_PAT || secrets.GITHUB_TOKEN }}
+          fetch-depth: 0
+
+      - name: Rebase on latest main
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git fetch origin main
+          git rebase origin/main
+
+      - name: Bump version and push tag
+        run: |
+          if [[ -n "${{ inputs.version }}" ]]; then
+            bash scripts/version-bump.sh "${{ inputs.version }}" --push-ref main
+          else
+            bash scripts/version-bump.sh ${{ inputs.bump_type || 'patch' }} --push-ref main
+          fi
+
+      - name: Release summary
+        run: echo "Released $(cat VERSION)"
