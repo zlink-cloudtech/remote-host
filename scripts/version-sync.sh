@@ -42,4 +42,16 @@ if [[ -f "$CLI_INDEX" ]]; then
   sed -Ei "s/\.version\(\"[0-9]+\.[0-9]+\.[0-9]+(-preview\.[0-9]+)?\"\)/.version(\"$version\")/" "$CLI_INDEX"
 fi
 
+# Sync skill metadata if present
+SKILL_JSON="$REPO_ROOT/skills/remote-host/skill.json"
+if [[ -f "$SKILL_JSON" ]]; then
+  node -e "
+    const fs = require('fs');
+    const f = '$SKILL_JSON';
+    const p = JSON.parse(fs.readFileSync(f, 'utf8'));
+    p.version = '$version';
+    fs.writeFileSync(f, JSON.stringify(p, null, 2) + '\n');
+  "
+fi
+
 echo "Synced all manifests → $version" >&2

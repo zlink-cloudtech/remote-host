@@ -39,6 +39,11 @@ if [[ -f "$REPO_ROOT/backend/package.json" ]]; then
   check "backend/package.json" "$(read_json_version "$REPO_ROOT/backend/package.json")"
 fi
 
+# Check skill metadata
+if [[ -f "$REPO_ROOT/skills/remote-host/skill.json" ]]; then
+  check "skills/remote-host/skill.json" "$(read_json_version "$REPO_ROOT/skills/remote-host/skill.json")"
+fi
+
 echo ""
 if [[ $errors -gt 0 ]]; then
   echo "✗ $errors version mismatch(es) found" >&2

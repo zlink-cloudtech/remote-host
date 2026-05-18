@@ -1,0 +1,14 @@
+{
+  "name": "remote-host",
+  "version": "0.1.6",
+  "description": "操作远程设备的技能，使用 remote-host CLI 工具连接、管理远程主机。适用场景： 用户需要向远程设备上传文件、从远程设备下载文件、在远程设备执行命令、 打开 SSH 交互会话、添加/删除/列出设备配置。 触发词：remote-host、远程设备、上传文件到设备、从设备下载、在设备上执行、ssh 连接设备。",
+  "author": "zlink-cloudtech",
+  "license": "MIT",
+  "tags": [
+    "remote-host",
+    "ssh",
+    "device-management",
+    "file-transfer"
+  ],
+  "skill_file": "SKILL.md"
+}
