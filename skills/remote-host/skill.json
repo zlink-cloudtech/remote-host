@@ -1,6 +1,6 @@
 {
   "name": "remote-host",
-  "version": "0.1.6-preview.1",
+  "version": "0.1.6-preview.2",
   "description": "使用 remote-host CLI 通过 SSH/SCP 管理远程设备时使用，包括维护设备配置、打开 SSH 会话、执行远程命令、上传下载文件、查看 CLI 配置。触发词：remote-host、远程设备、SSH、SCP、上传到设备、从设备下载、执行远程命令、设备列表、更新设备配置。",
   "author": "zlink-cloudtech",
   "license": "MIT",
