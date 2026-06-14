@@ -26,6 +26,11 @@ _remote_host_completion() {
     echo "$opts"
   }
 
+  # List configured device names via the CLI (authoritative, format-independent)
+  _remote_host_list_devices() {
+    remote-host _list-devices 2>/dev/null
+  }
+
   case "\${command}" in
     device)
       if [[ $COMP_CWORD -eq 2 ]]; then
@@ -40,31 +45,55 @@ _remote_host_completion() {
         add)
           local opts=$(_filter_used_options "--name --host --port --username --password --key-file" "\${COMP_WORDS[@]:3}")
           COMPREPLY=($(compgen -W "\${opts}" -- "\${cur}")) ;;
+        remove)
+          if [[ $COMP_CWORD -eq 3 ]]; then
+            local devices
+            devices=$(_remote_host_list_devices)
+            COMPREPLY=($(compgen -W "$devices" -- "\${cur}"))
+          fi ;;
         update)
-          local opts=$(_filter_used_options "--name --host --port --username --password --key-file --clear-password --clear-key-file" "\${COMP_WORDS[@]:3}")
-          COMPREPLY=($(compgen -W "\${opts}" -- "\${cur}")) ;;
+          if [[ $COMP_CWORD -eq 3 ]]; then
+            local devices
+            devices=$(_remote_host_list_devices)
+            COMPREPLY=($(compgen -W "$devices" -- "\${cur}"))
+          else
+            local opts=$(_filter_used_options "--name --host --port --username --password --key-file --clear-password --clear-key-file" "\${COMP_WORDS[@]:4}")
+            COMPREPLY=($(compgen -W "\${opts}" -- "\${cur}"))
+          fi ;;
       esac ;;
     ssh)
       if [[ $COMP_CWORD -eq 2 ]]; then
         local devices
-        devices=$(grep '^\s*name:' ~/.remote-ssh/devices.yaml 2>/dev/null | sed 's/^\s*name:\s*//')
+        devices=$(_remote_host_list_devices)
         COMPREPLY=($(compgen -W "$devices" -- "\${cur}"))
       fi ;;
     exec)
       if [[ "\${prev}" == "-d" || "\${prev}" == "--device" ]]; then
         local devices
-        devices=$(grep '^\s*name:' ~/.remote-ssh/devices.yaml 2>/dev/null | sed 's/^\s*name:\s*//')
+        devices=$(_remote_host_list_devices)
         COMPREPLY=($(compgen -W "$devices" -- "\${cur}"))
       elif [[ $COMP_CWORD -eq 2 ]]; then
         local opts=$(_filter_used_options "-d --device" "\${COMP_WORDS[@]:2}")
         COMPREPLY=($(compgen -W "\${opts}" -- "\${cur}"))
       fi ;;
     upload)
-      local opts=$(_filter_used_options "--recursive" "\${COMP_WORDS[@]:2}")
-      COMPREPLY=($(compgen -W "\${opts}" -- "\${cur}")) ;;
+      if [[ $COMP_CWORD -eq 2 ]]; then
+        local devices
+        devices=$(_remote_host_list_devices)
+        COMPREPLY=($(compgen -W "$devices" -- "\${cur}"))
+      else
+        local opts=$(_filter_used_options "--recursive" "\${COMP_WORDS[@]:2}")
+        COMPREPLY=($(compgen -W "\${opts}" -- "\${cur}"))
+      fi ;;
     download)
-      local opts=$(_filter_used_options "--recursive" "\${COMP_WORDS[@]:2}")
-      COMPREPLY=($(compgen -W "\${opts}" -- "\${cur}")) ;;
+      if [[ $COMP_CWORD -eq 2 ]]; then
+        local devices
+        devices=$(_remote_host_list_devices)
+        COMPREPLY=($(compgen -W "$devices" -- "\${cur}"))
+      else
+        local opts=$(_filter_used_options "--recursive" "\${COMP_WORDS[@]:2}")
+        COMPREPLY=($(compgen -W "\${opts}" -- "\${cur}"))
+      fi ;;
     config)
       if [[ $COMP_CWORD -eq 2 ]]; then
         COMPREPLY=($(compgen -W "show set-token" -- "\${cur}"))
