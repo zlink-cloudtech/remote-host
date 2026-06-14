@@ -65,7 +65,25 @@ remote-host/
 REMOTE_HOST_TOKEN   env var  >  ~/.remotehostrc.json token  >  ""
 ```
 
-`~/.remotehostrc.json` is written with mode `600`.
+`~/.remotehostrc.json` is written with mode `600`. The `env` field in `~/.remotehostrc.json` injects environment variables at startup without overriding existing ones.
+
+### Device Storage
+
+Devices are stored in `~/.remote-ssh/devices.yaml` (mode `600`), **separate** from the CLI config file. The storage path can be overridden via `REMOTE_SSH_DEVICES_DIR` env var (used in tests).
+
+```yaml
+# ~/.remote-ssh/devices.yaml
+devices:
+  - id: <8-char hex>   # auto-generated SHA-256 slice
+    name: my-pi
+    host: 192.168.1.10
+    port: 22
+    username: pi
+    password: secret    # optional; masked in output
+    keyFile: ~/.ssh/id_rsa  # optional alternative to password
+```
+
+Devices can be referenced by `id` or `name` in all commands.
 
 ### Error Handling
 
@@ -77,11 +95,21 @@ REMOTE_HOST_TOKEN   env var  >  ~/.remotehostrc.json token  >  ""
 
 ## CLI Commands
 
-| Command                              | Description                                 |
-| ------------------------------------ | ------------------------------------------- |
-| `remote-host config set-token <tok>` | Persist API token to `~/.remotehostrc.json` |
-| `remote-host config show`            | Show config file location and content       |
-| `remote-host completion [bash]`      | Output bash completion script               |
+| Command                                          | Description                                         |
+| ------------------------------------------------ | --------------------------------------------------- |
+| `remote-host device list [--show-password]`      | List all configured devices                         |
+| `remote-host device add [options]`               | Add a device (interactive if options omitted)       |
+| `remote-host device remove <id-or-name>`         | Remove a device by id or name                       |
+| `remote-host device update <id-or-name> [opts]`  | Update device fields                                |
+| `remote-host ssh <device>`                       | Open an interactive SSH session to a named device   |
+| `remote-host exec -d <device> [cmd...]`          | Run a command on a device via SSH                   |
+| `remote-host download <device> <remote> <local>` | Download a file/dir from device via scp             |
+| `remote-host upload <device> <local> <remote>`   | Upload a file/dir to device via scp                 |
+| `remote-host config set-token <tok>`             | Persist API token to `~/.remotehostrc.json`         |
+| `remote-host config show`                        | Show config file location and content               |
+| `remote-host completion [bash]`                  | Output bash completion script                       |
+
+`ssh`, `exec`, `download`, and `upload` use `sshpass` automatically when the device has a stored password, otherwise fall back to key-based auth. The `StrictHostKeyChecking=accept-new` SSH option is applied when using `sshpass` to avoid silent failures on first connections.
 
 ---
 
@@ -128,9 +156,13 @@ REMOTE_HOST_TOKEN   env var  >  ~/.remotehostrc.json token  >  ""
 
 ## Integration Tests
 
-| File                          | Coverage                 |
-| ----------------------------- | ------------------------ |
-| `tests/integration/*.test.ts` | (fill in per user story) |
+| File                                      | Coverage                             |
+| ----------------------------------------- | ------------------------------------ |
+| `tests/integration/device.test.ts`        | device add / list / remove / update  |
+| `tests/integration/list-devices.test.ts`  | `_list-devices` helper               |
+| `tests/integration/version-bump.test.ts`  | version bump scripts                 |
+
+Tests override `REMOTE_SSH_DEVICES_DIR` to isolate device storage from `~/.remote-ssh`.
 
 ---
 
