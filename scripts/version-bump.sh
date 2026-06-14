@@ -1,59 +1,63 @@
 #!/usr/bin/env bash
-# version-bump.sh — Bump VERSION, sync manifests, commit + tag + push.
-#
-# Usage:
-#   scripts/version-bump.sh [patch|minor|major|<version>] [--push-ref <branch>] [--no-commit]
+# version-bump.sh — Bump VERSION, sync manifests, and print the new version.
 set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 VERSION_FILE="$REPO_ROOT/VERSION"
-
-BUMP_TYPE="patch"
-EXPLICIT_VERSION=""
-PUSH_REF="main"
-NO_COMMIT=false
-
-while [[ $# -gt 0 ]]; do
-  case "$1" in
-    patch|minor|major) BUMP_TYPE="$1"; shift ;;
-    --push-ref)  PUSH_REF="${2:?--push-ref requires a value}"; shift 2 ;;
-    --no-commit) NO_COMMIT=true; shift ;;
-    *)
-      if [[ "$1" =~ ^v?([0-9]+\.[0-9]+\.[0-9]+)$ ]]; then
-        EXPLICIT_VERSION="${BASH_REMATCH[1]}"; shift
-      else
-        echo "Unknown option: $1" >&2; exit 1
-      fi ;;
-  esac
-done
+SEMVER_RE='^([0-9]+)\.([0-9]+)\.([0-9]+)(-preview\.([0-9]+))?$'
 
 [[ -f "$VERSION_FILE" ]] || { echo "ERROR: $VERSION_FILE not found" >&2; exit 1; }
 
-current=$(tr -d '[:space:]' < "$VERSION_FILE")
-base_version=$(sed -E 's/-preview\.[0-9]+$//' <<< "$current")
-IFS='.' read -r major minor patch <<< "$base_version"
+bump_level="patch"
+selected_flag=""
 
-if [[ -n "$EXPLICIT_VERSION" ]]; then
-  new_version="$EXPLICIT_VERSION"
-else
-  case "$BUMP_TYPE" in
-    patch) new_version="$major.$minor.$((patch + 1))" ;;
-    minor) new_version="$major.$((minor + 1)).0" ;;
-    major) new_version="$((major + 1)).0.0" ;;
+for arg in "$@"; do
+  case "$arg" in
+    --minor|--major)
+      [[ -z "$selected_flag" ]] || {
+        echo "ERROR: Only one bump level flag may be set" >&2
+        exit 1
+      }
+      selected_flag="$arg"
+      bump_level="${arg#--}"
+      ;;
+    *)
+      echo "ERROR: Unsupported argument '$arg'" >&2
+      exit 1
+      ;;
   esac
+done
+
+current="$(tr -d '[:space:]' < "$VERSION_FILE")"
+if [[ "$current" =~ $SEMVER_RE ]]; then
+  major_part="${BASH_REMATCH[1]}"
+  minor_part="${BASH_REMATCH[2]}"
+  patch_part="${BASH_REMATCH[3]}"
+else
+  echo "ERROR: VERSION '$current' is not valid semver" >&2
+  exit 1
 fi
 
-echo "$new_version" > "$VERSION_FILE"
+case "$bump_level" in
+  patch)
+    patch_part=$((patch_part + 1))
+    ;;
+  minor)
+    minor_part=$((minor_part + 1))
+    patch_part=0
+    ;;
+  major)
+    major_part=$((major_part + 1))
+    minor_part=0
+    patch_part=0
+    ;;
+  *)
+    echo "ERROR: Unsupported bump level '$bump_level'" >&2
+    exit 1
+    ;;
+esac
+
+new_version="$major_part.$minor_part.$patch_part"
+printf '%s\n' "$new_version" > "$VERSION_FILE"
 bash "$REPO_ROOT/scripts/version-sync.sh"
-
-if $NO_COMMIT; then
-  echo "$new_version"
-  exit 0
-fi
-
-git add -A
-git commit -m "chore: release $new_version [skip ci]"
-git tag -a "v$new_version" -m "v$new_version"
-git push origin "HEAD:$PUSH_REF" --follow-tags
-
-echo "Released v$new_version"
+printf '%s\n' "$new_version"

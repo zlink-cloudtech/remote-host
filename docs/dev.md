@@ -66,3 +66,19 @@ pnpm test
 # Run a specific test file
 cd tests && npx vitest run integration/<name>.test.ts
 ```
+
+## Versioning
+
+```bash
+# Bump the patch version
+pnpm version:bump
+
+# Bump the minor version and reset patch to 0
+pnpm version:bump --minor
+
+# Bump the major version and reset minor and patch to 0
+pnpm version:bump --major
+
+# Advance the preview suffix on the current base version
+pnpm version:preview
+```

@@ -16,6 +16,7 @@
     "lint:md": "markdownlint-cli2 '**/*.md' '#**/node_modules/**' '#**/dist/**'",
     "lint:all": "pnpm lint && pnpm lint:eslint && pnpm lint:prettier && pnpm lint:md",
     "lint:fix": "eslint . --fix && prettier --write .",
+    "version:bump": "bash scripts/version-bump.sh",
     "version:check": "bash scripts/check-versions.sh",
     "version:preview": "bash scripts/version-preview.sh",
     "setup-hooks": "bash scripts/setup-hooks.sh"
