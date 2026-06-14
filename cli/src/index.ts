@@ -2,6 +2,7 @@ import { Command } from "commander";
 import { readConfig } from "./lib/config-file.js";
 import { registerConfig } from "./commands/config.js";
 import { registerCompletion } from "./commands/completion.js";
+import { registerListDevices } from "./commands/_list-devices.js";
 import { registerDevice } from "./commands/device.js";
 import { registerSsh } from "./commands/ssh.js";
 import { registerExec } from "./commands/exec.js";
@@ -22,6 +23,7 @@ program
 
 registerConfig(program);
 registerCompletion(program);
+registerListDevices(program);
 registerDevice(program);
 registerSsh(program);
 registerExec(program);
