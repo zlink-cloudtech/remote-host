@@ -1,6 +1,6 @@
 {
   "name": "@zlink-cloudtech/remote-host",
-  "version": "0.1.6-preview.2",
+  "version": "0.1.7",
   "type": "module",
   "bin": {
     "remote-host": "bin/remote-host.js"
