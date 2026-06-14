@@ -36,12 +36,6 @@ if [[ -f "$REPO_ROOT/backend/package.json" ]]; then
   "
 fi
 
-# Sync CLI source program.version() if present
-CLI_INDEX="$REPO_ROOT/cli/src/index.ts"
-if [[ -f "$CLI_INDEX" ]]; then
-  sed -Ei "s/\.version\(\"[0-9]+\.[0-9]+\.[0-9]+(-preview\.[0-9]+)?\"\)/.version(\"$version\")/" "$CLI_INDEX"
-fi
-
 # Sync skill metadata if present
 SKILL_JSON="$REPO_ROOT/skills/remote-host/skill.json"
 if [[ -f "$SKILL_JSON" ]]; then

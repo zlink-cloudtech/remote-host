@@ -1,6 +1,6 @@
 {
   "name": "@zlink-cloudtech/remote-host",
-  "version": "1.0.0",
+  "version": "1.0.1-preview.1",
   "type": "module",
   "bin": {
     "remote-host": "bin/remote-host.js"
@@ -9,6 +9,7 @@
     "build": "tsc",
     "lint": "tsc --noEmit",
     "clean": "rm -rf dist",
+    "prepublishOnly": "pnpm build",
     "postinstall": "node scripts/postinstall.cjs"
   },
   "files": [
